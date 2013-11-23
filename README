@@ -1,0 +1,20 @@
+Autohphoto
+===========
+
+AutoPhoto Copyright (C) 2011 Pascal Zumkehr
+This program comes with ABSOLUTELY NO WARRANTY;
+This is free software, and you are welcome to redistribute it
+under certain conditions. See the file gpl.txt for more information.
+
+This program is provided as it is, there is no right to support.
+
+AutoPhoto was developed and tested on Mac OS X 10.6
+
+You require an external tool to take pictures from a camera. These pictures should 
+be put in a configured folder, where AutoPhoto will detect them.
+
+Configuration of general properties happens in the file autophoto.properties.
+
+And now have fun already :)
+
+!z
