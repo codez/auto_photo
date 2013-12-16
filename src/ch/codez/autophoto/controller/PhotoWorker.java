@@ -33,7 +33,7 @@ public class PhotoWorker implements Runnable {
 
     private static PhotoWorker INSTANCE = new PhotoWorker();
 
-    private Queue<File> tasks = new PriorityBlockingQueue<File>();
+    private Queue<Picture> tasks = new PriorityBlockingQueue<Picture>();
 
     private LayerBastler bastler = new LayerBastler();
 
@@ -62,8 +62,8 @@ public class PhotoWorker implements Runnable {
         this.running = false;
     }
 
-    public synchronized void addSouvenirImage(File image) {
-        this.tasks.offer(image);
+    public synchronized void addSouvenirImage(File image, String caption) {
+        this.tasks.offer(new Picture(image, caption));
         if (!this.running) {
             this.start();
         }
@@ -74,19 +74,19 @@ public class PhotoWorker implements Runnable {
     }
 
     public void run() {
-        File image = null;
+        Picture picture = null;
         try {
             Thread.sleep(settings.getDirectorWorkerDelay());
         } catch (InterruptedException e) {
         }
-        while (this.running && (image = this.tasks.poll()) != null) {
+        while (this.running && (picture = this.tasks.poll()) != null) {
             try {
                 long start = System.currentTimeMillis();
-                this.processImage(image);
+                this.processImage(picture.getFile());
                 log.info(System.currentTimeMillis() - start + "ms to process image");
             } catch (Throwable t) {
                 log.error("Fatal error while processing image", t);
-                this.tasks.add(image);
+                this.tasks.add(picture);
             }
 
             for (WorkerListener l : listeners) {

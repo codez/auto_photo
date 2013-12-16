@@ -79,7 +79,7 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
     public void paneClosed(boolean ok) {
         log.debug("Pane closed");
         if (ok) {
-            PhotoWorker.getInstance().addSouvenirImage(currentImage);
+            PhotoWorker.getInstance().addSouvenirImage(currentImage, notifier.getCaption());
         }
         ready();
     }
@@ -104,10 +104,14 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
 
     protected void init() {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setUndecorated(true);
-        this.setResizable(false);
         this.setBackground(Color.BLACK);
         this.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+
+        if (AppOptions.getInstance().getIsKioskMode()) {
+            this.setUndecorated(true);
+            this.setResizable(false);
+        }
+
         this.setVisible(true);
 
         this.initFramePanel();
@@ -199,7 +203,9 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
 
     private class FileListener extends FileAlterationListenerAdaptor {
         public void onFileCreate(File file) {
-            if (file.getName().toLowerCase().endsWith(".jpg") && !file.getName().startsWith("~")) {
+            String fileName = file.getName().toLowerCase();
+            if ((fileName.endsWith(".jpg") || fileName.endsWith(".jpeg"))
+                    && !fileName.startsWith("~")) {
                 pictureQueue.add(file);
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {

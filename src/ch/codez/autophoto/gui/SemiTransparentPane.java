@@ -20,10 +20,14 @@ import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
+import javax.swing.text.DefaultStyledDocument;
 
 import org.apache.log4j.Logger;
 
+import ch.codez.autophoto.AppOptions;
 import ch.codez.autophoto.controller.PaneCloseListener;
 
 public class SemiTransparentPane extends JPanel {
@@ -54,7 +58,13 @@ public class SemiTransparentPane extends JPanel {
 
     private boolean flashing;
 
+    private JTextArea captionField;
+
+    protected JPanel captionPane;
+
     private JButton use, discard;
+
+    private JComponent content;
 
     private final static Logger log = Logger.getLogger(SemiTransparentPane.class);
 
@@ -64,6 +74,7 @@ public class SemiTransparentPane extends JPanel {
 
     public void showContent(JComponent component, Dimension size) {
         this.removeAll();
+        this.content = component;
         this.add(component, BorderLayout.CENTER);
         this.add(this.bottom, BorderLayout.SOUTH);
         this.requestFocus();
@@ -144,6 +155,10 @@ public class SemiTransparentPane extends JPanel {
         listeners.remove(l);
     }
 
+    public String getCaption() {
+        return captionField.getText();
+    }
+
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         if (this.flashing) {
@@ -173,6 +188,7 @@ public class SemiTransparentPane extends JPanel {
         this.setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH,
                 BORDER_WIDTH));
         this.addKeyListener(new EscapeKeyListener());
+        this.initSlogan();
         this.initCloser();
     }
 
@@ -182,18 +198,20 @@ public class SemiTransparentPane extends JPanel {
         bottom.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 50));
         bottom.setOpaque(false);
 
-        use = new JButton("Verwenden");
-        use.setFont(use.getFont().deriveFont(30f));
+        use = createButton("Verwenden", Color.GREEN);
         use.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
-                SemiTransparentPane.this.close(true);
+                if (SemiTransparentPane.this.askForSlogan()) {
+                    SemiTransparentPane.this.showContent(captionPane, null);
+                } else {
+                    SemiTransparentPane.this.close(true);
+                }
             }
         });
         bottom.add(use);
 
-        discard = new JButton("Verwerfen");
-        discard.setFont(discard.getFont().deriveFont(30f));
+        discard = createButton("Verwerfen", Color.RED);
         discard.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
@@ -203,6 +221,52 @@ public class SemiTransparentPane extends JPanel {
         bottom.add(discard);
 
         this.add(this.bottom, BorderLayout.SOUTH);
+    }
+
+    private JButton createButton(String label, Color color) {
+        JButton button = new JButton(label);
+        button.setFont(discard.getFont().deriveFont(30f));
+        button.setBackground(Color.LIGHT_GRAY);
+        button.setOpaque(true);
+        button.setBorder(BorderFactory.createLineBorder(color.darker()));
+        return button;
+    }
+
+    private void initSlogan() {
+        int length = AppOptions.getInstance().getCaptionLength();
+
+        this.captionPane = new JPanel();
+        captionPane.setOpaque(false);
+        captionPane.setLayout(new BorderLayout(BORDER_WIDTH, BORDER_WIDTH));
+
+        int factor = 12 - ((length + 50) / 50);
+        factor = factor < 1 ? 1 : factor;
+        captionPane.setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH * factor,
+                BORDER_WIDTH * 5, BORDER_WIDTH * factor, BORDER_WIDTH * 5));
+
+        JLabel captionLabel = new JLabel("Dein Slogan:");
+        captionLabel.setFont(captionLabel.getFont().deriveFont(30f));
+        captionLabel.setForeground(Color.WHITE);
+        captionPane.add(captionLabel, BorderLayout.NORTH);
+
+        captionField = new JTextArea();
+        captionField.setFont(captionField.getFont().deriveFont(30f));
+        captionField.setLineWrap(true);
+        captionField.setWrapStyleWord(true);
+        captionField.setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH,
+                BORDER_WIDTH, BORDER_WIDTH));
+
+        if (length > 0) {
+            DefaultStyledDocument doc = new DefaultStyledDocument();
+            doc.setDocumentFilter(new DocumentSizeFilter(length));
+            captionField.setDocument(doc);
+        }
+
+        captionPane.add(captionField, BorderLayout.CENTER);
+    }
+
+    protected boolean askForSlogan() {
+        return AppOptions.getInstance().getCaptionLength() != 0 && content != captionPane;
     }
 
     protected void close(boolean ok) {

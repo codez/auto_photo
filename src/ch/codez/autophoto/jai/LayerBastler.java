@@ -31,31 +31,38 @@ public class LayerBastler {
         long end = System.currentTimeMillis();
         log.debug("loading image - " + (end - start));
 
-        start = end;
-        BufferedImage circle = cutCircle(snapshot.getAsBufferedImage());
-        end = System.currentTimeMillis();
-        log.debug("cutting circle - " + (end - start));
+        PlanarImage result = snapshot;
 
-        start = end;
-        PlanarImage mask = getMask(circle);
-        end = System.currentTimeMillis();
-        log.debug("masking image - " + (end - start));
+        if (AppOptions.getInstance().getMaskImage()) {
+            start = end;
+            BufferedImage circle = cutCircle(snapshot.getAsBufferedImage());
+            end = System.currentTimeMillis();
+            log.debug("cutting circle - " + (end - start));
 
-        start = end;
-        PlanarImage componentMask = getConnectedComponents(mask);
-        end = System.currentTimeMillis();
-        log.debug("find components- " + (end - start));
+            start = end;
+            PlanarImage mask = getMask(circle);
+            end = System.currentTimeMillis();
+            log.debug("masking image - " + (end - start));
 
-        start = end;
-        PlanarImage image = applyTransparencyMask(snapshot, componentMask);
-        end = System.currentTimeMillis();
-        log.debug("apply mask - " + (end - start));
+            start = end;
+            PlanarImage componentMask = getConnectedComponents(mask);
+            end = System.currentTimeMillis();
+            log.debug("find components- " + (end - start));
 
-        start = end;
-        BufferedImage result = crop(image, componentMask).getAsBufferedImage();
-        end = System.currentTimeMillis();
-        log.debug("crop image - " + (end - start));
-        return result;
+            start = end;
+            PlanarImage image = applyTransparencyMask(snapshot, componentMask);
+            end = System.currentTimeMillis();
+            log.debug("apply mask - " + (end - start));
+
+            start = end;
+            PlanarImage cropped = crop(image, componentMask);
+            end = System.currentTimeMillis();
+            log.debug("crop image - " + (end - start));
+
+            result = cropped;
+        }
+
+        return result.getAsBufferedImage();
     }
 
     private PlanarImage loadFile(String filename) {

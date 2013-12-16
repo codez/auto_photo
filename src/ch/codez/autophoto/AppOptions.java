@@ -40,7 +40,7 @@ public class AppOptions {
     }
 
     public boolean getIsKioskMode() {
-        return this.config.getBoolean("kiosk.mode", true);
+        return this.config.getBoolean("kiosk.mode", false);
     }
 
     public boolean getIsFakeFullscreen() {
@@ -55,8 +55,16 @@ public class AppOptions {
         return this.config.getLong("director.workerdelay", 2000);
     }
 
+    public int getCaptionLength() {
+        return this.config.getInt("director.captionLength", -1);
+    }
+
     public float getPictureQuality() {
         return this.config.getFloat("picture.quality");
+    }
+
+    public boolean getMaskImage() {
+        return this.config.getBoolean("render.mask", true);
     }
 
     public int getRenderArea() {
