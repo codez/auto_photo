@@ -58,7 +58,7 @@ public class SemiTransparentPane extends JPanel {
 
     private boolean flashing;
 
-    private JTextArea captionField;
+    protected JTextArea captionField;
 
     protected JPanel captionPane;
 
@@ -83,6 +83,7 @@ public class SemiTransparentPane extends JPanel {
             this.setSize(size);
         }
         this.validate();
+        this.getParent().validate();
     }
 
     public synchronized void flashOff() {
@@ -203,6 +204,7 @@ public class SemiTransparentPane extends JPanel {
 
             public void actionPerformed(ActionEvent e) {
                 if (SemiTransparentPane.this.askForSlogan()) {
+                    SemiTransparentPane.this.captionField.setText("");
                     SemiTransparentPane.this.showContent(captionPane, null);
                 } else {
                     SemiTransparentPane.this.close(true);
@@ -225,7 +227,7 @@ public class SemiTransparentPane extends JPanel {
 
     private JButton createButton(String label, Color color) {
         JButton button = new JButton(label);
-        button.setFont(discard.getFont().deriveFont(30f));
+        button.setFont(button.getFont().deriveFont(30f));
         button.setBackground(Color.LIGHT_GRAY);
         button.setOpaque(true);
         button.setBorder(BorderFactory.createLineBorder(color.darker()));

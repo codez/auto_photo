@@ -59,6 +59,10 @@ public class AppOptions {
         return this.config.getInt("director.captionLength", -1);
     }
 
+    public String getCaptionFile() {
+        return this.config.getString("director.captionFile", "captions.json");
+    }
+
     public float getPictureQuality() {
         return this.config.getFloat("picture.quality");
     }

@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 import ch.codez.autophoto.AppOptions;
@@ -82,7 +81,7 @@ public class PhotoWorker implements Runnable {
         while (this.running && (picture = this.tasks.poll()) != null) {
             try {
                 long start = System.currentTimeMillis();
-                this.processImage(picture.getFile());
+                this.processImage(picture);
                 log.info(System.currentTimeMillis() - start + "ms to process image");
             } catch (Throwable t) {
                 log.error("Fatal error while processing image", t);
@@ -121,17 +120,18 @@ public class PhotoWorker implements Runnable {
         log.debug("finished");
     }
 
-    private void processImage(File image) {
-        String baseName = FilenameUtils.getBaseName(image.getName());
-        String name = settings.getPathSouvenirs() + baseName + ".png";
+    private void processImage(Picture picture) {
+        String name = picture.getWorkName();
         log.debug("Rendering souvenir " + name);
 
         try {
-            BufferedImage souvenir = bastler.compose(image.getAbsolutePath());
+            BufferedImage souvenir = bastler.compose(picture.getSourceName());
             this.save(souvenir, name);
             log.debug("Souvenir " + name + " saved.");
-            FileUtils.copyFile(new File(name), new File(settings.getPathDestination() + baseName
-                    + ".png"));
+            FileUtils.copyFile(new File(name), new File(picture.getDestinationName()));
+            if (settings.getCaptionLength() != 0) {
+                saveCaption(picture);
+            }
         } catch (IOException e) {
             log.error("Could not save souvenir to file " + name, e);
         } catch (IllegalArgumentException iae) {
@@ -142,10 +142,49 @@ public class PhotoWorker implements Runnable {
     private void save(BufferedImage image, String file) throws IOException {
         BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
         PNGEncodeParam.RGB param = new PNGEncodeParam.RGB();
-        ImageEncoder encoder = ImageCodec.createImageEncoder("png", out, param);
+        ImageEncoder encoder = ImageCodec.createImageEncoder(Picture.EXTENSION, out, param);
 
         encoder.encode(image);
         out.close();
+    }
+
+    private void saveCaption(Picture picture) throws IOException {
+        File masterFile = new File(settings.getPathSouvenirs() + settings.getCaptionFile());
+        String json = "[]";
+        if (masterFile.exists()) {
+            json = FileUtils.readFileToString(masterFile);
+        }
+
+        StringBuilder result = new StringBuilder();
+        String existing = json.trim().substring(0, json.length() - 1).trim();
+        result.append(existing);
+        if (existing.endsWith("}")) {
+            result.append(",");
+        }
+        result.append("\n\t{ \"image\": \"");
+        result.append(picture.getBaseName()).append(".").append(Picture.EXTENSION);
+        result.append("\",\n\t  \"captions\": [\n");
+        appendCaptions(result, picture);
+        result.append(" ] }\n");
+        result.append("]");
+
+        File tmpFile = new File(settings.getPathSouvenirs() + settings.getCaptionFile() + ".tmp");
+        File destinationFile = new File(settings.getPathDestination() + settings.getCaptionFile());
+        FileUtils.write(tmpFile, result);
+        FileUtils.copyFile(tmpFile, destinationFile);
+        FileUtils.copyFile(tmpFile, masterFile);
+    }
+
+    private void appendCaptions(StringBuilder result, Picture picture) {
+        boolean first = true;
+        for (String caption : picture.getCaptions()) {
+            if (first) {
+                first = false;
+            } else {
+                result.append(",\n");
+            }
+            result.append("\t\t\"").append(caption.replaceAll("\n", "\\\\n")).append("\"");
+        }
     }
 
     public void addWorkerListener(WorkerListener listener) {
