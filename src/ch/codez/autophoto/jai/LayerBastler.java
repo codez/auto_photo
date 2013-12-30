@@ -67,7 +67,14 @@ public class LayerBastler {
 
     private PlanarImage loadFile(String filename) {
         PlanarImage image = JAI.create("fileload", filename);
+        image = crop(image);
+        image = scale(image);
 
+        log.debug("loaded " + filename + " - " + image.getWidth() + "x" + image.getHeight());
+        return image;
+    }
+
+    private PlanarImage scale(PlanarImage image) {
         int maxWidth = AppOptions.getInstance().getMaxWidth();
         if (maxWidth > 0 && maxWidth < image.getWidth()) {
             float factor = maxWidth / (float) image.getWidth();
@@ -80,8 +87,33 @@ public class LayerBastler {
 
             image = JAI.create("Scale", pb);
         }
+        return image;
+    }
 
-        log.debug("loaded " + filename + " - " + image.getWidth() + "x" + image.getHeight());
+    private PlanarImage crop(PlanarImage image) {
+        float ratio = AppOptions.getInstance().getSideRatio();
+        if (ratio > 0) {
+            ParameterBlockJAI pb = new ParameterBlockJAI("Crop", RenderedRegistryMode.MODE_NAME);
+            pb.setSource("source0", image);
+
+            float width = image.getWidth();
+            float height = image.getHeight();
+            if (width / height > ratio) {
+                float newWidth = height * ratio;
+                pb.setParameter("x", (width - newWidth) / 2f);
+                pb.setParameter("y", 0f);
+                pb.setParameter("width", newWidth);
+                pb.setParameter("height", height);
+            } else {
+                float newHeight = width / ratio;
+                pb.setParameter("x", 0f);
+                pb.setParameter("y", (height - newHeight) / 2f);
+                pb.setParameter("width", width);
+                pb.setParameter("height", newHeight);
+            }
+
+            image = JAI.create("Crop", pb);
+        }
         return image;
     }
 

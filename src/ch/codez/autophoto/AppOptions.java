@@ -99,6 +99,10 @@ public class AppOptions {
         return this.config.getInt("render.maxWidth", 0);
     }
 
+    public float getSideRatio() {
+        return this.config.getFloat("render.sideRatio", 0);
+    }
+
     public String getPathSnapshots() {
         return this.getPath("path.snapshots");
     }
