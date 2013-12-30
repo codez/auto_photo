@@ -6,6 +6,7 @@ package ch.codez.autophoto.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
@@ -18,6 +19,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -239,22 +242,24 @@ public class SemiTransparentPane extends JPanel {
 
         this.captionPane = new JPanel();
         captionPane.setOpaque(false);
-        captionPane.setLayout(new BorderLayout(BORDER_WIDTH, BORDER_WIDTH));
+        captionPane.setLayout(new BoxLayout(captionPane, BoxLayout.Y_AXIS));
+        captionPane.setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH * 5, BORDER_WIDTH * 5,
+                BORDER_WIDTH * 5, BORDER_WIDTH * 5));
 
-        int factor = 12 - ((length + 50) / 50);
-        factor = factor < 1 ? 1 : factor;
-        captionPane.setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH * factor,
-                BORDER_WIDTH * 5, BORDER_WIDTH * factor, BORDER_WIDTH * 5));
+        captionPane.add(Box.createVerticalGlue());
 
         JLabel captionLabel = new JLabel("Dein Slogan:");
         captionLabel.setFont(captionLabel.getFont().deriveFont(30f));
         captionLabel.setForeground(Color.WHITE);
-        captionPane.add(captionLabel, BorderLayout.NORTH);
+        captionLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        captionPane.add(captionLabel);
+        captionPane.add(Box.createRigidArea(new Dimension(BORDER_WIDTH, BORDER_WIDTH)));
 
         captionField = new JTextArea();
         captionField.setFont(captionField.getFont().deriveFont(30f));
         captionField.setLineWrap(true);
         captionField.setWrapStyleWord(true);
+        captionField.setAlignmentX(Component.CENTER_ALIGNMENT);
         captionField.setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH,
                 BORDER_WIDTH, BORDER_WIDTH));
 
@@ -262,9 +267,15 @@ public class SemiTransparentPane extends JPanel {
             DefaultStyledDocument doc = new DefaultStyledDocument();
             doc.setDocumentFilter(new DocumentSizeFilter(length));
             captionField.setDocument(doc);
+            System.out.println(this.getHeight());
+            Dimension size = new Dimension(700, 38 * (length + 39) / 40);
+            captionField.setMaximumSize(size);
+            captionField.setPreferredSize(size);
         }
 
-        captionPane.add(captionField, BorderLayout.CENTER);
+        captionPane.add(captionField);
+
+        captionPane.add(Box.createVerticalGlue());
     }
 
     protected boolean askForSlogan() {
