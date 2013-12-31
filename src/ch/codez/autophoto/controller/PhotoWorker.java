@@ -156,7 +156,8 @@ public class PhotoWorker implements Runnable {
         }
 
         StringBuilder result = new StringBuilder();
-        String existing = json.trim().substring(0, json.length() - 1).trim();
+        String existing = json.trim().substring(0, json.trim().length() - 1).trim();
+        log.debug("Existing JSON: " + existing);
         result.append(existing);
         if (existing.endsWith("}")) {
             result.append(",");

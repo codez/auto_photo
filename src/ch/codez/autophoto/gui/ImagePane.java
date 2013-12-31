@@ -44,7 +44,6 @@ public class ImagePane extends JPanel {
         int rotation = AppOptions.getInstance().getRotationAngle();
         double ratio = getImageRatio();
 
-        log.debug("ratio " + ratio);
         Insets insets = this.getInsets();
         int insetWidth = insets.left + insets.right;
         int insetHeight = insets.top + insets.bottom;
@@ -53,16 +52,13 @@ public class ImagePane extends JPanel {
         int top = insets.top;
         int width = this.getWidth() - insetWidth;
         int height = this.getHeight() - insetHeight;
-        log.debug("pane " + width + "x" + height);
 
         int maxWidth = (int) ((rotation == 0 ? height : width) * ratio);
-        log.debug("maxWidth " + maxWidth);
         if (width > maxWidth) {
             left = (width - maxWidth) / 2 + insets.left;
             width = maxWidth;
         }
         int maxHeight = (int) (rotation == 0 ? width / ratio : width * ratio);
-        log.debug("maxHeight " + maxHeight);
         if (height > maxHeight) {
             top = (height - maxHeight) / 2 + insets.top;
             height = maxHeight;
@@ -72,7 +68,6 @@ public class ImagePane extends JPanel {
             ((Graphics2D) g).rotate(Math.toRadians(rotation), (this.getWidth()) / 2,
                     (this.getHeight()) / 2);
         }
-        log.debug("Draw at " + left + "x" + top + " w=" + width + " h=" + height);
         g.drawImage(this.image, left, top, width, height, null);
     }
 
@@ -84,7 +79,6 @@ public class ImagePane extends JPanel {
             width = height;
             height = dummy;
         }
-        log.debug("Image w=" + width + " h=" + height);
         return width / (double) height;
     }
 }
