@@ -5,11 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.Logger;
 
 import ch.codez.autophoto.AppOptions;
 
 public class Picture {
     public final static String EXTENSION = "png";
+
+    private final static Logger log = Logger.getLogger(Picture.class);
 
     private File file;
 
@@ -47,4 +50,5 @@ public class Picture {
     public List<String> getCaptions() {
         return this.captions;
     }
+
 }

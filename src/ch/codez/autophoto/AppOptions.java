@@ -95,6 +95,17 @@ public class AppOptions {
         return this.config.getInt("render.cutRadiusPercent", 100);
     }
 
+    public int getRotationAngle() {
+        String rotation = this.config.getString("render.rotation");
+        if (rotation == null || rotation.trim().isEmpty()) {
+            return 0;
+        } else if (rotation.equals("counterclockwise")) {
+            return 270;
+        } else {
+            return 90;
+        }
+    }
+
     public int getMaxWidth() {
         return this.config.getInt("render.maxWidth", 0);
     }

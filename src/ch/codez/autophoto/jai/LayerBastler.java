@@ -67,6 +67,7 @@ public class LayerBastler {
 
     private PlanarImage loadFile(String filename) {
         PlanarImage image = JAI.create("fileload", filename);
+        image = rotate(image);
         image = crop(image);
         image = scale(image);
 
@@ -113,6 +114,20 @@ public class LayerBastler {
             }
 
             image = JAI.create("Crop", pb);
+        }
+        return image;
+    }
+
+    private PlanarImage rotate(PlanarImage image) {
+        int angle = AppOptions.getInstance().getRotationAngle();
+        if (angle != 0) {
+            ParameterBlockJAI pb = new ParameterBlockJAI("Rotate", RenderedRegistryMode.MODE_NAME);
+            pb.setSource("source0", image);
+            pb.setParameter("xOrigin", image.getWidth() / 2f);
+            pb.setParameter("yOrigin", image.getHeight() / 2f);
+            pb.setParameter("angle", (float) Math.toRadians(angle));
+
+            image = JAI.create("Rotate", pb);
         }
         return image;
     }
