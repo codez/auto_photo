@@ -170,7 +170,7 @@ public class PhotoWorker implements Runnable {
 
         File tmpFile = new File(settings.getPathSouvenirs() + settings.getCaptionFile() + ".tmp");
         File destinationFile = new File(settings.getPathDestination() + settings.getCaptionFile());
-        FileUtils.write(tmpFile, result);
+        FileUtils.write(tmpFile, result, "UTF-8");
         FileUtils.copyFile(tmpFile, destinationFile);
         FileUtils.copyFile(tmpFile, masterFile);
     }
@@ -183,7 +183,7 @@ public class PhotoWorker implements Runnable {
             } else {
                 result.append(",\n");
             }
-            result.append("\t\t\"").append(caption.replaceAll("\n", "\\\\n")).append("\"");
+            result.append("\t\t").append(JsonUtil.quote(caption));
         }
     }
 

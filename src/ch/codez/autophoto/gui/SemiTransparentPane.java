@@ -87,6 +87,7 @@ public class SemiTransparentPane extends JPanel {
         }
         this.validate();
         this.getParent().validate();
+        this.repaint();
     }
 
     public synchronized void flashOff() {
@@ -208,6 +209,7 @@ public class SemiTransparentPane extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 if (SemiTransparentPane.this.askForSlogan()) {
                     SemiTransparentPane.this.captionField.setText("");
+                    log.debug("Show Caption Pane");
                     SemiTransparentPane.this.showContent(captionPane, null);
                 } else {
                     SemiTransparentPane.this.close(true);
