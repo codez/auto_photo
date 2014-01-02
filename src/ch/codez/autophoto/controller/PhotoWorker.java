@@ -44,8 +44,14 @@ public class PhotoWorker implements Runnable {
 
     private Set<WorkerListener> listeners = new HashSet<WorkerListener>();
 
+    private File captionFile;
+
     public static PhotoWorker getInstance() {
         return INSTANCE;
+    }
+
+    public PhotoWorker() {
+        this.captionFile = new File(settings.getPathSouvenirs() + settings.getCaptionFile());
     }
 
     public void start() {
@@ -126,12 +132,12 @@ public class PhotoWorker implements Runnable {
 
         try {
             BufferedImage souvenir = bastler.compose(picture.getSourceName());
-            this.save(souvenir, name);
-            log.debug("Souvenir " + name + " saved.");
-            FileUtils.copyFile(new File(name), new File(picture.getDestinationName()));
+            saveImage(souvenir, name);
             if (settings.getCaptionLength() != 0) {
                 saveCaption(picture);
             }
+            copyToDestination(picture, name);
+            log.debug("Souvenir " + name + " saved.");
         } catch (IOException e) {
             log.error("Could not save souvenir to file " + name, e);
         } catch (IllegalArgumentException iae) {
@@ -139,7 +145,7 @@ public class PhotoWorker implements Runnable {
         }
     }
 
-    private void save(BufferedImage image, String file) throws IOException {
+    private void saveImage(BufferedImage image, String file) throws IOException {
         BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
         PNGEncodeParam.RGB param = new PNGEncodeParam.RGB();
         ImageEncoder encoder = ImageCodec.createImageEncoder(Picture.EXTENSION, out, param);
@@ -149,15 +155,13 @@ public class PhotoWorker implements Runnable {
     }
 
     private void saveCaption(Picture picture) throws IOException {
-        File masterFile = new File(settings.getPathSouvenirs() + settings.getCaptionFile());
         String json = "[]";
-        if (masterFile.exists()) {
-            json = FileUtils.readFileToString(masterFile);
+        if (captionFile.exists()) {
+            json = FileUtils.readFileToString(captionFile, "UTF-8").trim();
         }
 
         StringBuilder result = new StringBuilder();
-        String existing = json.trim().substring(0, json.trim().length() - 1).trim();
-        log.debug("Existing JSON: " + existing);
+        String existing = json.substring(0, json.length() - 1).trim();
         result.append(existing);
         if (existing.endsWith("}")) {
             result.append(",");
@@ -169,11 +173,19 @@ public class PhotoWorker implements Runnable {
         result.append(" ] }\n");
         result.append("]");
 
-        File tmpFile = new File(settings.getPathSouvenirs() + settings.getCaptionFile() + ".tmp");
-        File destinationFile = new File(settings.getPathDestination() + settings.getCaptionFile());
+        File tmpFile = new File(captionFile.getAbsolutePath() + ".tmp");
         FileUtils.write(tmpFile, result, "UTF-8");
-        FileUtils.copyFile(tmpFile, destinationFile);
-        FileUtils.copyFile(tmpFile, masterFile);
+        FileUtils.copyFile(tmpFile, captionFile);
+    }
+
+    private void copyToDestination(Picture picture, String name) throws IOException {
+        FileUtils.copyFile(new File(name), new File(picture.getDestinationName()));
+
+        if (settings.getCaptionLength() != 0) {
+            File destinationFile = new File(settings.getPathDestination()
+                    + settings.getCaptionFile());
+            FileUtils.copyFile(captionFile, destinationFile);
+        }
     }
 
     private void appendCaptions(StringBuilder result, Picture picture) {
