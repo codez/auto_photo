@@ -41,9 +41,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
 public class DocumentSizeFilter extends DocumentFilter {
-    int maxCharacters;
-
-    boolean DEBUG = false;
+    private int maxCharacters;
 
     public DocumentSizeFilter(int maxChars) {
         maxCharacters = maxChars;
@@ -51,10 +49,6 @@ public class DocumentSizeFilter extends DocumentFilter {
 
     public void insertString(FilterBypass fb, int offs, String str, AttributeSet a)
             throws BadLocationException {
-        if (DEBUG) {
-            System.out.println("in DocumentSizeFilter's insertString method");
-        }
-
         // This rejects the entire insertion if it would make
         // the contents too long. Another option would be
         // to truncate the inserted string so the contents
@@ -67,9 +61,6 @@ public class DocumentSizeFilter extends DocumentFilter {
 
     public void replace(FilterBypass fb, int offs, int length, String str, AttributeSet a)
             throws BadLocationException {
-        if (DEBUG) {
-            System.out.println("in DocumentSizeFilter's replace method");
-        }
         // This rejects the entire replacement if it would make
         // the contents too long. Another option would be
         // to truncate the replacement string so the contents

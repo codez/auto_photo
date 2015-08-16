@@ -79,7 +79,8 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
     public void paneClosed(boolean ok) {
         log.debug("Pane closed");
         if (ok) {
-            PhotoWorker.getInstance().addSouvenirImage(currentImage, notifier.getCaption());
+            PhotoWorker.getInstance().addSouvenirImage(currentImage, notifier.getName(),
+                    notifier.getCrime());
         }
         ready();
     }
@@ -143,6 +144,7 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
         pane.setLayout(new BorderLayout());
         pane.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
         pane.add(initInfo(), BorderLayout.CENTER);
+        pane.setBackground(Color.black);
         return pane;
     }
 
@@ -184,8 +186,8 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
     }
 
     private void initFileMonitor() {
-        FileAlterationObserver observer = new FileAlterationObserver(AppOptions.getInstance()
-                .getPathSnapshots());
+        FileAlterationObserver observer = new FileAlterationObserver(
+                AppOptions.getInstance().getPathSnapshots());
         observer.addListener(new FileListener());
         fileMonitor = new FileAlterationMonitor(1000, observer);
         try {
@@ -212,6 +214,8 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
                         ready();
                     }
                 });
+            } else {
+                log.debug("Unknown file format: " + file.getName());
             }
         }
     }

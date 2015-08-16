@@ -1,30 +1,27 @@
 package ch.codez.autophoto.controller;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 import ch.codez.autophoto.AppOptions;
 
-public class Picture {
+public class Picture implements Comparable<Picture> {
     public final static String EXTENSION = "png";
 
     private final static Logger log = Logger.getLogger(Picture.class);
 
     private File file;
 
-    private List<String> captions;
+    private String name;
 
-    public Picture(File file, String caption) {
-        this(file, Arrays.asList(caption));
-    }
+    private String crime;
 
-    public Picture(File file, List<String> captions) {
+    public Picture(File file, String name, String crime) {
         this.file = file;
-        this.captions = captions;
+        this.name = name;
+        this.crime = crime;
     }
 
     public String getBaseName() {
@@ -47,8 +44,16 @@ public class Picture {
         return this.file;
     }
 
-    public List<String> getCaptions() {
-        return this.captions;
+    public String getName() {
+        return this.name;
+    }
+
+    public String getCrime() {
+        return this.crime;
+    }
+
+    public int compareTo(Picture o) {
+        return this.getFile().compareTo(o.getFile());
     }
 
 }

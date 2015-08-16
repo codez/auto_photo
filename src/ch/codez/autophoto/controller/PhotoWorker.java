@@ -67,8 +67,8 @@ public class PhotoWorker implements Runnable {
         this.running = false;
     }
 
-    public synchronized void addSouvenirImage(File image, String caption) {
-        this.tasks.offer(new Picture(image, caption));
+    public synchronized void addSouvenirImage(File image, String name, String crime) {
+        this.tasks.offer(new Picture(image, name, crime));
         if (!this.running) {
             this.start();
         }
@@ -168,9 +168,11 @@ public class PhotoWorker implements Runnable {
         }
         result.append("\n\t{ \"image\": \"");
         result.append(picture.getBaseName()).append(".").append(Picture.EXTENSION);
-        result.append("\",\n\t  \"captions\": [\n");
-        appendCaptions(result, picture);
-        result.append(" ] }\n");
+        result.append("\",\n\t  \"name\": ");
+        result.append(JsonUtil.quote(picture.getName()));
+        result.append(",\n\t  \"crime\": ");
+        result.append(JsonUtil.quote(picture.getCrime()));
+        result.append(" }\n");
         result.append("]");
 
         File tmpFile = new File(captionFile.getAbsolutePath() + ".tmp");
@@ -185,18 +187,6 @@ public class PhotoWorker implements Runnable {
             File destinationFile = new File(settings.getPathDestination()
                     + settings.getCaptionFile());
             FileUtils.copyFile(captionFile, destinationFile);
-        }
-    }
-
-    private void appendCaptions(StringBuilder result, Picture picture) {
-        boolean first = true;
-        for (String caption : picture.getCaptions()) {
-            if (first) {
-                first = false;
-            } else {
-                result.append(",\n");
-            }
-            result.append("\t\t").append(JsonUtil.quote(caption));
         }
     }
 

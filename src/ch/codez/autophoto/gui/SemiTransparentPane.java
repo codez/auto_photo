@@ -25,7 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.text.DefaultStyledDocument;
 
 import org.apache.log4j.Logger;
@@ -55,13 +55,17 @@ public class SemiTransparentPane extends JPanel {
 
     private final static int FLASH_TIME = 20;
 
+    private final static float FONT_SIZE = 36f;
+
     private Set<PaneCloseListener> listeners = new HashSet<PaneCloseListener>();
 
     private JPanel bottom;
 
     private boolean flashing;
 
-    protected JTextArea captionField;
+    protected JTextField nameField = new JTextField();
+
+    protected JTextField crimeField = new JTextField();
 
     protected JPanel captionPane;
 
@@ -160,8 +164,12 @@ public class SemiTransparentPane extends JPanel {
         listeners.remove(l);
     }
 
-    public String getCaption() {
-        return captionField.getText();
+    public String getName() {
+        return nameField.getText();
+    }
+
+    public String getCrime() {
+        return crimeField.getText();
     }
 
     protected void paintComponent(Graphics g) {
@@ -203,12 +211,12 @@ public class SemiTransparentPane extends JPanel {
         bottom.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 50));
         bottom.setOpaque(false);
 
-        use = createButton("Verwenden", Color.GREEN);
+        use = createButton("Verwenden", new Color(90, 255, 90));
         use.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 if (SemiTransparentPane.this.askForSlogan()) {
-                    SemiTransparentPane.this.captionField.setText("");
+                    SemiTransparentPane.this.nameField.setText("");
                     log.debug("Show Caption Pane");
                     SemiTransparentPane.this.showContent(captionPane, null);
                 } else {
@@ -218,7 +226,7 @@ public class SemiTransparentPane extends JPanel {
         });
         bottom.add(use);
 
-        discard = createButton("Verwerfen", Color.RED);
+        discard = createButton("Verwerfen", new Color(255, 90, 90));
         discard.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
@@ -232,16 +240,14 @@ public class SemiTransparentPane extends JPanel {
 
     private JButton createButton(String label, Color color) {
         JButton button = new JButton(label);
-        button.setFont(button.getFont().deriveFont(30f));
-        button.setBackground(Color.LIGHT_GRAY);
+        button.setFont(button.getFont().deriveFont(FONT_SIZE));
+        button.setBackground(color.brighter()); // (Color.LIGHT_GRAY);
         button.setOpaque(true);
         button.setBorder(BorderFactory.createLineBorder(color.darker()));
         return button;
     }
 
     private void initSlogan() {
-        int length = AppOptions.getInstance().getCaptionLength();
-
         this.captionPane = new JPanel();
         captionPane.setOpaque(false);
         captionPane.setLayout(new BoxLayout(captionPane, BoxLayout.Y_AXIS));
@@ -250,34 +256,38 @@ public class SemiTransparentPane extends JPanel {
 
         captionPane.add(Box.createVerticalGlue());
 
-        JLabel captionLabel = new JLabel("Dein Slogan:");
-        captionLabel.setFont(captionLabel.getFont().deriveFont(30f));
+        addLabeledField("Name, Vorname:", nameField);
+
+        captionPane.add(Box.createRigidArea(new Dimension(BORDER_WIDTH, BORDER_WIDTH * 3)));
+
+        addLabeledField("Tatbestand:", crimeField);
+    }
+
+    private void addLabeledField(String caption, JTextField field) {
+        // label
+        JLabel captionLabel = new JLabel(caption);
+        captionLabel.setFont(captionLabel.getFont().deriveFont(FONT_SIZE));
         captionLabel.setForeground(Color.WHITE);
         captionLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         captionPane.add(captionLabel);
+
+        // gap
         captionPane.add(Box.createRigidArea(new Dimension(BORDER_WIDTH, BORDER_WIDTH)));
 
-        captionField = new JTextArea();
-        captionField.setFont(captionField.getFont().deriveFont(30f));
-        captionField.setLineWrap(true);
-        captionField.setWrapStyleWord(true);
-        captionField.setAlignmentX(Component.CENTER_ALIGNMENT);
-        captionField.setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH,
-                BORDER_WIDTH, BORDER_WIDTH));
+        // input
+        field.setFont(field.getFont().deriveFont(FONT_SIZE));
+        field.setAlignmentX(Component.CENTER_ALIGNMENT);
+        field.setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH / 2, BORDER_WIDTH / 2,
+                BORDER_WIDTH / 2, BORDER_WIDTH / 2));
 
+        int length = AppOptions.getInstance().getCaptionLength();
         if (length > 0) {
             DefaultStyledDocument doc = new DefaultStyledDocument();
             doc.setDocumentFilter(new DocumentSizeFilter(length));
-            captionField.setDocument(doc);
-            System.out.println(this.getHeight());
-            Dimension size = new Dimension(700, 38 * (length + 39) / 40);
-            captionField.setMaximumSize(size);
-            captionField.setPreferredSize(size);
+            field.setDocument(doc);
         }
 
-        captionPane.add(captionField);
-
-        captionPane.add(Box.createVerticalGlue());
+        captionPane.add(field);
     }
 
     protected boolean askForSlogan() {
