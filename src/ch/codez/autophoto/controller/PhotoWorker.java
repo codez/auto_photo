@@ -17,12 +17,12 @@ import java.util.concurrent.PriorityBlockingQueue;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
-import ch.codez.autophoto.AppOptions;
-import ch.codez.autophoto.jai.LayerBastler;
-
 import com.sun.media.jai.codec.ImageCodec;
 import com.sun.media.jai.codec.ImageEncoder;
 import com.sun.media.jai.codec.PNGEncodeParam;
+
+import ch.codez.autophoto.AppOptions;
+import ch.codez.autophoto.jai.LayerBastler;
 
 public class PhotoWorker implements Runnable {
 
@@ -172,6 +172,8 @@ public class PhotoWorker implements Runnable {
         result.append(JsonUtil.quote(picture.getName()));
         result.append(",\n\t  \"crime\": ");
         result.append(JsonUtil.quote(picture.getCrime()));
+        result.append(",\n\t  \"date\": ");
+        result.append(JsonUtil.quote(picture.getDate()));
         result.append(" }\n");
         result.append("]");
 
@@ -184,8 +186,8 @@ public class PhotoWorker implements Runnable {
         FileUtils.copyFile(new File(name), new File(picture.getDestinationName()));
 
         if (settings.getCaptionLength() != 0) {
-            File destinationFile = new File(settings.getPathDestination()
-                    + settings.getCaptionFile());
+            File destinationFile = new File(
+                    settings.getPathDestination() + settings.getCaptionFile());
             FileUtils.copyFile(captionFile, destinationFile);
         }
     }

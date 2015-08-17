@@ -1,5 +1,9 @@
 package ch.codez.autophoto.controller;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 // Copyright Codehaus Jettison
 public class JsonUtil {
     public static String quote(String string) {
@@ -54,5 +58,10 @@ public class JsonUtil {
         }
         sb.append('"');
         return sb.toString();
+    }
+
+    public static String quote(Date date) {
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        return '"' + format.format(date) + '"';
     }
 }

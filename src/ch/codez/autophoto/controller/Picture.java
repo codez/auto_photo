@@ -1,6 +1,7 @@
 package ch.codez.autophoto.controller;
 
 import java.io.File;
+import java.util.Date;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
@@ -18,10 +19,13 @@ public class Picture implements Comparable<Picture> {
 
     private String crime;
 
+    private Date date;
+
     public Picture(File file, String name, String crime) {
         this.file = file;
         this.name = name;
         this.crime = crime;
+        this.date = new Date();
     }
 
     public String getBaseName() {
@@ -50,6 +54,10 @@ public class Picture implements Comparable<Picture> {
 
     public String getCrime() {
         return this.crime;
+    }
+
+    public Date getDate() {
+        return this.date;
     }
 
     public int compareTo(Picture o) {

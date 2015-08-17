@@ -33,7 +33,7 @@ import org.apache.log4j.Logger;
 import ch.codez.autophoto.AppOptions;
 import ch.codez.autophoto.controller.PaneCloseListener;
 
-public class SemiTransparentPane extends JPanel {
+public class PreviewPane extends JPanel {
 
     public final static Dimension SCREEN_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 
@@ -73,9 +73,9 @@ public class SemiTransparentPane extends JPanel {
 
     private JComponent content;
 
-    private final static Logger log = Logger.getLogger(SemiTransparentPane.class);
+    private final static Logger log = Logger.getLogger(PreviewPane.class);
 
-    public SemiTransparentPane() {
+    public PreviewPane() {
         this.init();
     }
 
@@ -128,8 +128,8 @@ public class SemiTransparentPane extends JPanel {
                     int w = (int) (startSize.getWidth() + factor * scaleX);
                     int h = (int) (startSize.getHeight() + factor * scaleY);
 
-                    SemiTransparentPane.this.setSize(w, h);
-                    SemiTransparentPane.this.repaint();
+                    PreviewPane.this.setSize(w, h);
+                    PreviewPane.this.repaint();
 
                     try {
                         Thread.sleep(50);
@@ -137,8 +137,8 @@ public class SemiTransparentPane extends JPanel {
                     }
                 }
 
-                SemiTransparentPane.this.getRootPane().setDefaultButton(use);
-                SemiTransparentPane.this.requestFocus();
+                PreviewPane.this.getRootPane().setDefaultButton(use);
+                PreviewPane.this.requestFocus();
             }
         }.start();
     }
@@ -215,12 +215,12 @@ public class SemiTransparentPane extends JPanel {
         use.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
-                if (SemiTransparentPane.this.askForSlogan()) {
-                    SemiTransparentPane.this.nameField.setText("");
+                if (PreviewPane.this.askForSlogan()) {
+                    PreviewPane.this.nameField.setText("");
                     log.debug("Show Caption Pane");
-                    SemiTransparentPane.this.showContent(captionPane, null);
+                    PreviewPane.this.showContent(captionPane, null);
                 } else {
-                    SemiTransparentPane.this.close(true);
+                    PreviewPane.this.close(true);
                 }
             }
         });
@@ -230,7 +230,7 @@ public class SemiTransparentPane extends JPanel {
         discard.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
-                SemiTransparentPane.this.close(false);
+                PreviewPane.this.close(false);
             }
         });
         bottom.add(discard);
@@ -304,9 +304,9 @@ public class SemiTransparentPane extends JPanel {
     private class EscapeKeyListener extends KeyAdapter {
         public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                SemiTransparentPane.this.close(false);
+                PreviewPane.this.close(false);
             } else if (e.getKeyCode() == KeyEvent.VK_ENTER || e.getKeyCode() == KeyEvent.VK_SPACE) {
-                SemiTransparentPane.this.close(true);
+                PreviewPane.this.close(true);
             }
         }
     }

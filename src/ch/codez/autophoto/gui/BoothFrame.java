@@ -46,7 +46,7 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
     private static Logger log = Logger.getLogger(BoothFrame.class);
 
     // notification components
-    private SemiTransparentPane notifier = new SemiTransparentPane();
+    private PreviewPane notifier = new PreviewPane();
 
     private ImagePane previewPane = new ImagePane();
 
@@ -94,8 +94,8 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
         if (currentImage != null) {
             ImageIcon icon = new ImageIcon(currentImage.getAbsolutePath());
             this.previewPane.setImage(icon.getImage());
-            this.notifier.showContent(this.previewPane, SemiTransparentPane.SCREEN_SIZE);
-            this.notifier.scaleTo(SemiTransparentPane.HALF_SCREEN_SIZE);
+            this.notifier.showContent(this.previewPane, PreviewPane.SCREEN_SIZE);
+            this.notifier.scaleTo(PreviewPane.HALF_SCREEN_SIZE);
         }
     }
 
@@ -152,7 +152,7 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
         JLabel message = new JLabel("<html><center>" + AppOptions.getInstance().getLafMessageMain()
                 + "</center></html>");
         Font font = message.getFont().deriveFont(Font.BOLD,
-                (int) SemiTransparentPane.SCREEN_SIZE.getHeight() / 15);
+                (int) PreviewPane.SCREEN_SIZE.getHeight() / 15);
         message.setFont(font);
         message.setForeground(Color.white);
         message.setHorizontalAlignment(JLabel.CENTER);
