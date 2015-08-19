@@ -61,7 +61,7 @@ public class JsonUtil {
     }
 
     public static String quote(Date date) {
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        return '"' + format.format(date) + '"';
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        return '"' + format.format(date).replaceFirst("\\+(\\d\\d)(\\d\\d)$", "+$1:$2") + '"';
     }
 }

@@ -92,6 +92,7 @@ public class PreviewPane extends JPanel {
         this.validate();
         this.getParent().validate();
         this.repaint();
+        this.nameField.requestFocus();
     }
 
     public synchronized void flashOff() {
@@ -217,6 +218,7 @@ public class PreviewPane extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 if (PreviewPane.this.askForSlogan()) {
                     PreviewPane.this.nameField.setText("");
+                    PreviewPane.this.crimeField.setText("");
                     log.debug("Show Caption Pane");
                     PreviewPane.this.showContent(captionPane, null);
                 } else {

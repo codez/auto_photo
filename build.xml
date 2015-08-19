@@ -1,76 +1,73 @@
 <project name="AutoPhoto" default="dist" basedir=".">
-    <description>
+	<description>
         simple example build file
     </description>
 
-  <!-- set global properties for this build -->
-  <property name="project" value="autophoto" />
-  <property name="src" location="src"/>
-  <property name="conf" location="conf" />
-  <property name="lib" location="lib"/>
-  <property name="build" location="bin"/>
-  <property name="dist"  location="dist"/>
-  <property name="app"   location="${dist}/${ant.project.name}" />
+	<!-- set global properties for this build -->
+	<property name="project" value="autophoto" />
+	<property name="src" location="src" />
+	<property name="conf" location="conf" />
+	<property name="lib" location="lib" />
+	<property name="build" location="bin" />
+	<property name="dist" location="dist" />
+	<property name="app" location="${dist}/${ant.project.name}" />
 
-  <fileset id="jars" dir="${lib}">
-     <exclude name="**/*-javadoc.jar"/>
-     <exclude name="**/*-sources.jar"/>
-  </fileset>
+	<fileset id="jars" dir="${lib}">
+		<exclude name="**/*-javadoc.jar" />
+		<exclude name="**/*-sources.jar" />
+	</fileset>
 
-  <path id="classpath">
-    <pathelement location="."/>
-    <fileset refid="jars" />
-  </path>
-  
-  <target name="init">
-    <!-- Create the time stamp -->
-    <tstamp/>
-    <!-- Create the build directory structure used by compile -->
-    <mkdir dir="${build}"/>
-  </target>
+	<path id="classpath">
+		<pathelement location="." />
+		<fileset refid="jars" />
+	</path>
 
-  <target name="compile" depends="init"
-        description="compile the source " >
-    <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}">
-       <classpath refid="classpath"/>
-    </javac>
-    <copy todir="${build}/" >
-      <fileset dir="${conf}" />
-    </copy> 
-  </target>
+	<target name="init">
+		<!-- Create the time stamp -->
+		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build}" />
+	</target>
 
-  <target name="jar" depends="compile"
-        description="create jar file" >
-    <!-- Create the distribution directory -->
-    <mkdir dir="${dist}/lib"/>
+	<target name="compile" depends="init" description="compile the source ">
+		<!-- Compile the java code from ${src} into ${build} -->
+		<javac srcdir="${src}" destdir="${build}" target="1.6" source="1.6">
+			<classpath refid="classpath" />
+		</javac>
+		<copy todir="${build}/">
+			<fileset dir="${conf}" />
+		</copy>
+	</target>
 
-    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
-    <jar jarfile="${dist}/lib/${project}-${DSTAMP}.jar" basedir="${build}"
-         manifest="${conf}/META-INF/MANIFEST.MF" />
-  </target>
+	<target name="jar" depends="compile" description="create jar file">
+		<!-- Create the distribution directory -->
+		<mkdir dir="${dist}/lib" />
 
-  <target name="dist" depends="jar" description="generate the zipped distribution" >
-    <mkdir dir="${app}" />
-    <mkdir dir="${app}/lib" />
-    
-    <copy file="${dist}/lib/${project}-${DSTAMP}.jar" tofile="${app}/${project}.jar" />
-    <copy todir="${app}/lib">
-      <fileset refid="jars" />
-    </copy>
-    <copy file="${conf}/autophoto.sh" todir="${app}" />
-    <copy file="${conf}/autophoto.properties" todir="${app}" />
-    <copy file="README" todir="${app}" />
-    <copy file="GPL-LICENSE" todir="${app}" />
-  	
-    <chmod file="${app}/autophoto.sh" perm="+x"/>
+		<!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+		<jar jarfile="${dist}/lib/${project}-${DSTAMP}.jar" basedir="${build}" manifest="${conf}/META-INF/MANIFEST.MF" />
+	</target>
 
-    <zip destfile="${dist}/${project}.zip" basedir="${app}" />
-  </target>
+	<target name="dist" depends="jar" description="generate the zipped distribution">
+		<mkdir dir="${app}" />
+		<mkdir dir="${app}/lib" />
 
-  <target name="clean" description="clean up" >
-    <!-- Delete the ${build} and ${dist} directory trees -->
-    <delete dir="${build}"/>
-    <delete dir="${dist}"/>
-  </target>
+		<copy file="${dist}/lib/${project}-${DSTAMP}.jar" tofile="${app}/${project}.jar" />
+		<copy todir="${app}/lib">
+			<fileset refid="jars" />
+		</copy>
+		<copy file="${conf}/autophoto.sh" todir="${app}" />
+		<copy file="${conf}/autophoto.properties" todir="${app}" />
+		<copy file="README" todir="${app}" />
+		<copy file="GPL-LICENSE" todir="${app}" />
+
+		<chmod file="${app}/autophoto.sh" perm="+x" />
+
+		<zip destfile="${dist}/${project}.zip" basedir="${app}" />
+	</target>
+
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build} and ${dist} directory trees -->
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+	</target>
 </project>

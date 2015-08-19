@@ -48,7 +48,7 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
     // notification components
     private PreviewPane notifier = new PreviewPane();
 
-    private ImagePane previewPane = new ImagePane();
+    private ImagePane imagePane = new ImagePane();
 
     private FileAlterationMonitor fileMonitor;
 
@@ -93,8 +93,8 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
         currentImage = pictureQueue.poll();
         if (currentImage != null) {
             ImageIcon icon = new ImageIcon(currentImage.getAbsolutePath());
-            this.previewPane.setImage(icon.getImage());
-            this.notifier.showContent(this.previewPane, PreviewPane.SCREEN_SIZE);
+            this.imagePane.setImage(icon.getImage());
+            this.notifier.showContent(this.imagePane, PreviewPane.SCREEN_SIZE);
             this.notifier.scaleTo(PreviewPane.HALF_SCREEN_SIZE);
         }
     }
@@ -162,21 +162,24 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
     private JPanel initSpinnerPane() {
         JPanel pane = new JPanel();
         pane.setLayout(new BorderLayout());
+        pane.setBackground(Color.black);
 
         JPanel overlay = new JPanel();
         overlay.setLayout(new OverlayLayout(overlay));
+        overlay.setBackground(Color.black);
 
         ImageIcon icon = this.loadIcon(SPINNER_IMAGE);
         spinner.setIcon(icon);
+        spinner.setAlignmentX(0.5f);
+        spinner.setAlignmentY(0.5f);
+        spinner.setVisible(false);
+
         queueLabel.setText("");
         queueLabel.setForeground(Color.WHITE);
         queueLabel.setFont(queueLabel.getFont().deriveFont(9f));
-        spinner.setAlignmentX(0.5f);
-        spinner.setAlignmentY(0.5f);
         queueLabel.setAlignmentX(0.5f);
         queueLabel.setAlignmentY(0.5f);
         queueLabel.setVisible(false);
-        spinner.setVisible(false);
 
         overlay.add(queueLabel);
         overlay.add(spinner);
