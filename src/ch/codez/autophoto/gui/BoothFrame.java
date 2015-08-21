@@ -151,7 +151,8 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
     private JComponent initInfo() {
         JLabel message = new JLabel("<html><center>" + AppOptions.getInstance().getLafMessageMain()
                 + "</center></html>");
-        Font font = message.getFont().deriveFont(Font.BOLD,
+
+        Font font = new Font(AppOptions.getInstance().getLafFont(), Font.PLAIN,
                 (int) PreviewPane.SCREEN_SIZE.getHeight() / 15);
         message.setFont(font);
         message.setForeground(Color.white);

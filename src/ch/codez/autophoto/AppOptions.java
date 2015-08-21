@@ -135,6 +135,10 @@ public class AppOptions {
         return this.config.getString("laf.message.main");
     }
 
+    public String getLafFont() {
+        return this.config.getString("laf.font", "Helvetica");
+    }
+
     private void save() {
         this.config.setProperty("picture.lastseq", new Integer(this.sequence));
         try {

@@ -8,6 +8,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
@@ -55,7 +56,7 @@ public class PreviewPane extends JPanel {
 
     private final static int FLASH_TIME = 20;
 
-    private final static float FONT_SIZE = 36f;
+    private final static int FONT_SIZE = 36;
 
     private Set<PaneCloseListener> listeners = new HashSet<PaneCloseListener>();
 
@@ -242,11 +243,16 @@ public class PreviewPane extends JPanel {
 
     private JButton createButton(String label, Color color) {
         JButton button = new JButton(label);
-        button.setFont(button.getFont().deriveFont(FONT_SIZE));
+        button.setFont(getLafFont());
         button.setBackground(color.brighter()); // (Color.LIGHT_GRAY);
         button.setOpaque(true);
         button.setBorder(BorderFactory.createLineBorder(color.darker()));
+        button.setPreferredSize(new Dimension(60, 60));
         return button;
+    }
+
+    private Font getLafFont() {
+        return new Font(AppOptions.getInstance().getLafFont(), Font.PLAIN, FONT_SIZE);
     }
 
     private void initSlogan() {
@@ -268,7 +274,7 @@ public class PreviewPane extends JPanel {
     private void addLabeledField(String caption, JTextField field) {
         // label
         JLabel captionLabel = new JLabel(caption);
-        captionLabel.setFont(captionLabel.getFont().deriveFont(FONT_SIZE));
+        captionLabel.setFont(getLafFont());
         captionLabel.setForeground(Color.WHITE);
         captionLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         captionPane.add(captionLabel);
@@ -277,10 +283,9 @@ public class PreviewPane extends JPanel {
         captionPane.add(Box.createRigidArea(new Dimension(BORDER_WIDTH, BORDER_WIDTH)));
 
         // input
-        field.setFont(field.getFont().deriveFont(FONT_SIZE));
+        field.setFont(getLafFont());
         field.setAlignmentX(Component.CENTER_ALIGNMENT);
-        field.setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH / 2, BORDER_WIDTH / 2,
-                BORDER_WIDTH / 2, BORDER_WIDTH / 2));
+        field.setBorder(BorderFactory.createEmptyBorder(0, BORDER_WIDTH, 0, BORDER_WIDTH));
 
         int length = AppOptions.getInstance().getCaptionLength();
         if (length > 0) {
