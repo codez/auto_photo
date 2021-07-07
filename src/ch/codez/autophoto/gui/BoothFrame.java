@@ -78,7 +78,7 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
 
     public void paneClosed(boolean ok) {
         log.debug("Pane closed");
-        if (ok) {
+        if (ok && currentImage != null) {
             PhotoWorker.getInstance().addSouvenirImage(currentImage, notifier.getName(),
                     notifier.getCrime());
         }
