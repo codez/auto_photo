@@ -6,18 +6,9 @@ package ch.codez.autophoto;
 
 import java.io.File;
 
-import javax.media.jai.JAI;
-import javax.media.jai.OperationRegistry;
-import javax.media.jai.registry.CRIFRegistry;
-import javax.media.jai.registry.RIFRegistry;
-
 import org.apache.log4j.Logger;
 
 import ch.codez.autophoto.gui.BoothFrame;
-import ch.codez.autophoto.jai.ColorEraserCRIF;
-import ch.codez.autophoto.jai.ColorEraserDescriptor;
-import ch.codez.autophoto.jai.ComponentsSelectorDescriptor;
-import ch.codez.autophoto.jai.ConnectedComponentsDescriptor;
 
 public class Main {
 
@@ -26,7 +17,6 @@ public class Main {
     public static void main(String[] args) throws Exception {
         assertSettings();
         setOSXOptions();
-        registerJAIStuff();
         createPictureDirectories();
 
         BoothFrame frame = new BoothFrame();
@@ -37,22 +27,6 @@ public class Main {
         // System.setProperty("apple.awt.fakefullscreen", "true");
         // System.setProperty("apple.awt.fullscreenusefade", "true");
         System.setProperty("apple.laf.useScreenMenuBar", "true");
-    }
-
-    private static void registerJAIStuff() {
-        OperationRegistry registry = JAI.getDefaultInstance().getOperationRegistry();
-        registry.registerDescriptor(new ColorEraserDescriptor());
-        ColorEraserCRIF crif = new ColorEraserCRIF();
-        RIFRegistry.register(registry, "ColorEraser", "ColorEraser", crif);
-        CRIFRegistry.register(registry, "ColorEraser", crif);
-
-        ConnectedComponentsDescriptor connDesc = new ConnectedComponentsDescriptor();
-        registry.registerDescriptor(connDesc);
-        RIFRegistry.register(registry, "connectedcomponents", "connectedcomponents", connDesc);
-
-        ComponentsSelectorDescriptor selDesc = new ComponentsSelectorDescriptor();
-        registry.registerDescriptor(selDesc);
-        RIFRegistry.register(registry, "componentsselector", "componentsselector", selDesc);
     }
 
     private static void createPictureDirectories() {

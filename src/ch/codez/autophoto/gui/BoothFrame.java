@@ -5,43 +5,30 @@
  */
 package ch.codez.autophoto.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.Toolkit;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.File;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
-import javax.swing.JPanel;
-import javax.swing.OverlayLayout;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
-import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
-import org.apache.commons.io.monitor.FileAlterationMonitor;
-import org.apache.commons.io.monitor.FileAlterationObserver;
+import ch.codez.autophoto.controller.*;
+import ch.codez.souvenirbooth.gui.RoundButton;
 import org.apache.log4j.Logger;
 
 import ch.codez.autophoto.AppOptions;
-import ch.codez.autophoto.controller.PaneCloseListener;
-import ch.codez.autophoto.controller.PhotoWorker;
-import ch.codez.autophoto.controller.WorkerListener;
 
-public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListener {
+public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListener, DirectorListener {
 
     private final static String CONTROL_BG_IMAGE = "/images/metal.jpg";
 
     private final static String SPINNER_IMAGE = "/images/spinner.gif";
 
+    private final static String CAMERA_IMAGE = "/images/camera.gif";
+
     private final static int BORDER = 50;
+
+    private final static int BUTTON_SIZE = 60;
+    
 
     private static Logger log = Logger.getLogger(BoothFrame.class);
 
@@ -50,18 +37,21 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
 
     private ImagePane imagePane = new ImagePane();
 
-    private FileAlterationMonitor fileMonitor;
-
-    private Queue<File> pictureQueue = new ConcurrentLinkedQueue<File>();
-
     private File currentImage = null;
 
+    private Director director = new Director();
+
+    private boolean isCountingDown = false;
+
     private JLabel queueLabel = new JLabel();
-
+    private JLabel countdown = new JLabel();
     private JLabel spinner = new JLabel();
+    private JLabel processing = new JLabel();
 
+    
     public BoothFrame() {
         super("AutoPhoto");
+        this.director.addListener(this);
         this.init();
     }
 
@@ -82,19 +72,39 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
             PhotoWorker.getInstance().addSouvenirImage(currentImage, notifier.getName(),
                     notifier.getCrime());
         }
-        ready();
+        if (this.isCountingDown) {
+            this.director.cancel();
+            this.isCountingDown = false;
+        }
+    }
+    public void countDownAt(int i) {
+        this.isCountingDown = true;
+        this.countdown.setText(String.valueOf(i));
+        this.notifier.showContent(this.countdown, PreviewPane.HALF_SCREEN_SIZE, false);
+
+        if (i == 0) {
+            this.notifier.flashOff();
+            this.isCountingDown = false;
+        }
+        this.validate();
     }
 
-    public void ready() {
-        if (this.isNotifying()) {
+    public void processing() {
+        /*
+        this.notifier.showContent(this.processing,
+                PreviewPane.NOTIFICATION_SIZE);
+        this.notifier.setCloseText("its längt's");
+         */
+    }
+
+    public void ready(String filename) {
+        if (this.isNotifying() || this.isCountingDown) {
             return;
         }
-
-        currentImage = pictureQueue.poll();
-        if (currentImage != null) {
-            ImageIcon icon = new ImageIcon(currentImage.getAbsolutePath());
+        if (filename != null) {
+            ImageIcon icon = new ImageIcon(filename);
             this.imagePane.setImage(icon.getImage());
-            this.notifier.showContent(this.imagePane, PreviewPane.SCREEN_SIZE);
+            this.notifier.showContent(this.imagePane, PreviewPane.SCREEN_SIZE, true);
             this.notifier.scaleTo(PreviewPane.HALF_SCREEN_SIZE);
         }
     }
@@ -116,7 +126,7 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
         this.setVisible(true);
 
         this.initFramePanel();
-        this.initFileMonitor();
+        this.initCountdown();
         this.notifier.addCloseListener(this);
 
         this.validate();
@@ -144,6 +154,7 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
         pane.setLayout(new BorderLayout());
         pane.setBorder(BorderFactory.createEmptyBorder(BORDER, BORDER, BORDER, BORDER));
         pane.add(initInfo(), BorderLayout.CENTER);
+        pane.add(this.initTriggerButton(), BorderLayout.SOUTH);
         pane.setBackground(Color.black);
         return pane;
     }
@@ -160,6 +171,14 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
         return message;
     }
 
+    private JButton initTriggerButton() {
+        ImageIcon icon = this.loadIcon(CAMERA_IMAGE);
+        icon = new ImageIcon(icon.getImage().getScaledInstance(
+                BUTTON_SIZE, BUTTON_SIZE, Image.SCALE_SMOOTH));
+        JButton button = new RoundButton(new CountdownAction(icon));
+        button.setForeground(AppOptions.getInstance().getLafColorHighlight());
+        return button;
+    }
     private JPanel initSpinnerPane() {
         JPanel pane = new JPanel();
         pane.setLayout(new BorderLayout());
@@ -189,16 +208,12 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
         return pane;
     }
 
-    private void initFileMonitor() {
-        FileAlterationObserver observer = new FileAlterationObserver(
-                AppOptions.getInstance().getPathSnapshots());
-        observer.addListener(new FileListener());
-        fileMonitor = new FileAlterationMonitor(1000, observer);
-        try {
-            fileMonitor.start();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    private void initCountdown() {
+        this.countdown.setHorizontalAlignment(JLabel.CENTER);
+        Font font = this.countdown.getFont().deriveFont(Font.BOLD,
+                (int)PreviewPane.HALF_SCREEN_SIZE.getHeight() / 2);
+        this.countdown.setFont(font);
+        this.countdown.setForeground(Color.WHITE);
     }
 
     private ImageIcon loadIcon(String file) {
@@ -207,22 +222,6 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
         return icon;
     }
 
-    private class FileListener extends FileAlterationListenerAdaptor {
-        public void onFileCreate(File file) {
-            String fileName = file.getName().toLowerCase();
-            if ((fileName.endsWith(".jpg") || fileName.endsWith(".jpeg"))
-                    && !fileName.startsWith("~")) {
-                pictureQueue.add(file);
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        ready();
-                    }
-                });
-            } else {
-                log.debug("Unknown file format: " + file.getName());
-            }
-        }
-    }
 
     private void updateSpinner(boolean visible) {
         queueLabel.setText(String.valueOf(PhotoWorker.getInstance().getQueueLength()));
@@ -256,4 +255,16 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
         });
     }
 
+    private class CountdownAction extends AbstractAction {
+        public CountdownAction(Icon icon) {
+            super(null, icon);
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            if (BoothFrame.this.isNotifying()) {
+                return;
+            }
+            BoothFrame.this.director.andAction();
+        }
+    }
 }

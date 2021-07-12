@@ -51,9 +51,23 @@ public class AppOptions {
         return this.getColor("cam.bgcolor", "#FFFFFF");
     }
 
-    public long getDirectorWorkerDelay() {
-        return this.config.getLong("director.workerdelay", 2000);
+    public int getCamDelay() {
+        return this.config.getInt("cam.delay", 0);
     }
+
+    public String getCamAdapterClass() {
+        return this.config.getString("cam.adapterclass",
+                "ch.codez.autophoto.util.ISightCaptureAdapter");
+    }
+
+    public int getDirectorCountdown() {
+        return this.config.getInt("director.countdown", 10);
+    }
+
+    public int getDirectorWorkerDelay() {
+        return this.config.getInt("director.workerdelay", 15);
+    }
+
 
     public int getCaptionLength() {
         return this.config.getInt("director.captionLength", -1);

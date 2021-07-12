@@ -12,10 +12,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -60,7 +57,7 @@ public class PreviewPane extends JPanel {
 
     private Set<PaneCloseListener> listeners = new HashSet<PaneCloseListener>();
 
-    private JPanel bottom;
+    private JPanel confirmationPanel;
 
     private boolean flashing;
 
@@ -72,6 +69,8 @@ public class PreviewPane extends JPanel {
 
     private JButton use, discard;
 
+    private JButton closer;
+
     private JComponent content;
 
     private final static Logger log = Logger.getLogger(PreviewPane.class);
@@ -80,11 +79,11 @@ public class PreviewPane extends JPanel {
         this.init();
     }
 
-    public void showContent(JComponent component, Dimension size) {
+    public void showContent(JComponent component,  Dimension size, boolean confirmation) {
         this.removeAll();
         this.content = component;
         this.add(component, BorderLayout.CENTER);
-        this.add(this.bottom, BorderLayout.SOUTH);
+        this.add(confirmation ? this.confirmationPanel : this.closer, BorderLayout.SOUTH);
         this.requestFocus();
         this.setVisible(true);
         if (size != null) {
@@ -203,15 +202,26 @@ public class PreviewPane extends JPanel {
         this.setBorder(BorderFactory.createEmptyBorder(BORDER_WIDTH, BORDER_WIDTH, BORDER_WIDTH,
                 BORDER_WIDTH));
         this.addKeyListener(new EscapeKeyListener());
-        this.initSlogan();
-        this.initCloser();
+        this.initCaptionPane();
+        this.initCloserButton();
+        this.initConfirmationButtons();
     }
 
-    private void initCloser() {
-        bottom = new JPanel();
-        bottom.setLayout(new GridLayout(1, 2, 50, 50));
-        bottom.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 50));
-        bottom.setOpaque(false);
+    private void initCloserButton() {
+        this.closer = createButton("Stop", new Color(255, 90, 90));
+        this.closer.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                PreviewPane.this.close(false);
+            }
+        });
+    }
+
+    private void initConfirmationButtons() {
+        confirmationPanel = new JPanel();
+        confirmationPanel.setLayout(new GridLayout(1, 2, 50, 50));
+        confirmationPanel.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 50));
+        confirmationPanel.setOpaque(false);
 
         use = createButton("Verwenden", new Color(90, 255, 90));
         use.addActionListener(new ActionListener() {
@@ -221,13 +231,13 @@ public class PreviewPane extends JPanel {
                     PreviewPane.this.nameField.setText("");
                     PreviewPane.this.crimeField.setText("");
                     log.debug("Show Caption Pane");
-                    PreviewPane.this.showContent(captionPane, null);
+                    PreviewPane.this.showContent(captionPane, null, true);
                 } else {
                     PreviewPane.this.close(true);
                 }
             }
         });
-        bottom.add(use);
+        confirmationPanel.add(use);
 
         discard = createButton("Verwerfen", new Color(255, 90, 90));
         discard.addActionListener(new ActionListener() {
@@ -236,9 +246,7 @@ public class PreviewPane extends JPanel {
                 PreviewPane.this.close(false);
             }
         });
-        bottom.add(discard);
-
-        this.add(this.bottom, BorderLayout.SOUTH);
+        confirmationPanel.add(discard);
     }
 
     private JButton createButton(String label, Color color) {
@@ -255,7 +263,7 @@ public class PreviewPane extends JPanel {
         return new Font(AppOptions.getInstance().getLafFont(), Font.PLAIN, FONT_SIZE);
     }
 
-    private void initSlogan() {
+    private void initCaptionPane() {
         this.captionPane = new JPanel();
         captionPane.setOpaque(false);
         captionPane.setLayout(new BoxLayout(captionPane, BoxLayout.Y_AXIS));
@@ -318,4 +326,13 @@ public class PreviewPane extends JPanel {
         }
     }
 
+    private class CloseClickListener extends MouseAdapter {
+
+        public void mouseClicked(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON1) {
+                PreviewPane.this.close(false);
+            }
+        }
+
+    }
 }

@@ -5,9 +5,7 @@
 package ch.codez.autophoto.controller;
 
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Queue;
@@ -17,12 +15,10 @@ import java.util.concurrent.PriorityBlockingQueue;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
-import com.sun.media.jai.codec.ImageCodec;
-import com.sun.media.jai.codec.ImageEncoder;
-import com.sun.media.jai.codec.PNGEncodeParam;
 
 import ch.codez.autophoto.AppOptions;
-import ch.codez.autophoto.jai.LayerBastler;
+
+import javax.imageio.ImageIO;
 
 public class PhotoWorker implements Runnable {
 
@@ -146,12 +142,7 @@ public class PhotoWorker implements Runnable {
     }
 
     private void saveImage(BufferedImage image, String file) throws IOException {
-        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-        PNGEncodeParam.RGB param = new PNGEncodeParam.RGB();
-        ImageEncoder encoder = ImageCodec.createImageEncoder(Picture.EXTENSION, out, param);
-
-        encoder.encode(image);
-        out.close();
+        ImageIO.write(image, "JPG", new File(file));
     }
 
     private void saveCaption(Picture picture) throws IOException {
