@@ -4,6 +4,7 @@
  */
 package ch.codez.autophoto.camera;
 
+import ch.codez.autophoto.AppOptions;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -11,21 +12,20 @@ import java.io.File;
 public class GPhotoAdapter extends CommandAdapter {
 
     private static Logger log = Logger.getLogger(GPhotoAdapter.class);
-    
-    private final String GPHOTO_CMD = "/usr/local/bin/gphoto2 ";
-    
-    private final String GPHOTO_CAPTURE_CMD = GPHOTO_CMD + " --capture-image-and-download -F 1 -I 1";
 
-    private final String GPHOTO_TEST_CMD = GPHOTO_CMD + "--summary";
+    private final String CAPTURE_CMD = " --capture-image-and-download -F 1 -I 0";
+
+    private final String TEST_CMD = " --summary";
     
     private final String SNAPSHOT_FILE = "capt0000.jpg";
     
     
     public String getCaptureCommand(String filename) {
+        String path = AppOptions.getInstance().getCamGphotoPath();
         if (filename != null) {
-            return GPHOTO_CAPTURE_CMD;
+            return path + CAPTURE_CMD;
         } else {
-            return GPHOTO_TEST_CMD;
+            return path + TEST_CMD;
         }
     }
     

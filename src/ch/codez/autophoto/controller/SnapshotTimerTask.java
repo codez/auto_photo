@@ -27,7 +27,7 @@ public class SnapshotTimerTask extends DelayedTask {
     
     public void run() {
         if (this.takeSnapshot()) {
-            log.debug("Took snapshot");
+            log.debug("Took snapshot " + this.getSnapshotFilename());
             this.director.snapshotReady(this.getSnapshotFilename());
         }
     }

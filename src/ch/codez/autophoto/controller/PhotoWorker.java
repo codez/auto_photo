@@ -63,8 +63,8 @@ public class PhotoWorker implements Runnable {
         this.running = false;
     }
 
-    public synchronized void addSouvenirImage(File image, String name, String crime) {
-        this.tasks.offer(new Picture(image, name, crime));
+    public synchronized void addPhoto(File image, String name) {
+        this.tasks.offer(new Picture(image, name));
         if (!this.running) {
             this.start();
         }
@@ -159,10 +159,8 @@ public class PhotoWorker implements Runnable {
         }
         result.append("\n\t{ \"image\": \"");
         result.append(picture.getBaseName()).append(".").append(Picture.EXTENSION);
-        result.append("\",\n\t  \"name\": ");
-        result.append(JsonUtil.quote(picture.getName()));
-        result.append(",\n\t  \"crime\": ");
-        result.append(JsonUtil.quote(picture.getCrime()));
+        result.append("\",\n\t  \"caption\": ");
+        result.append(JsonUtil.quote(picture.getCaption()));
         result.append(",\n\t  \"date\": ");
         result.append(JsonUtil.quote(picture.getDate()));
         result.append(" }\n");

@@ -15,16 +15,13 @@ public class Picture implements Comparable<Picture> {
 
     private File file;
 
-    private String name;
-
-    private String crime;
+    private String caption;
 
     private Date date;
 
-    public Picture(File file, String name, String crime) {
+    public Picture(File file, String caption) {
         this.file = file;
-        this.name = name;
-        this.crime = crime;
+        this.caption = caption;
         this.date = new Date();
     }
 
@@ -48,12 +45,8 @@ public class Picture implements Comparable<Picture> {
         return this.file;
     }
 
-    public String getName() {
-        return this.name;
-    }
-
-    public String getCrime() {
-        return this.crime;
+    public String getCaption() {
+        return this.caption;
     }
 
     public Date getDate() {

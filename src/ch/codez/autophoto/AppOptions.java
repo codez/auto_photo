@@ -60,6 +60,10 @@ public class AppOptions {
                 "ch.codez.autophoto.util.ISightCaptureAdapter");
     }
 
+    public String getCamGphotoPath() {
+        return this.config.getString("cam.gphoto.path",
+                "/usr/local/bin/gphoto2");
+    }
     public int getDirectorCountdown() {
         return this.config.getInt("director.countdown", 10);
     }
@@ -67,7 +71,6 @@ public class AppOptions {
     public int getDirectorWorkerDelay() {
         return this.config.getInt("director.workerdelay", 15);
     }
-
 
     public int getCaptionLength() {
         return this.config.getInt("director.captionLength", -1);

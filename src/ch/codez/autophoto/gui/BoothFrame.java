@@ -12,7 +12,6 @@ import java.io.File;
 import javax.swing.*;
 
 import ch.codez.autophoto.controller.*;
-import ch.codez.souvenirbooth.gui.RoundButton;
 import org.apache.log4j.Logger;
 
 import ch.codez.autophoto.AppOptions;
@@ -22,6 +21,7 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
     private final static String CONTROL_BG_IMAGE = "/images/metal.jpg";
 
     private final static String SPINNER_IMAGE = "/images/spinner.gif";
+    private final static String SPINNER_LARGE_IMAGE = "/images/spinner_large.gif";
 
     private final static String CAMERA_IMAGE = "/images/camera.gif";
 
@@ -48,6 +48,8 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
     private JLabel spinner = new JLabel();
     private JLabel processing = new JLabel();
 
+    private JPanel triggerPane = new JPanel();
+
     
     public BoothFrame() {
         super("AutoPhoto");
@@ -67,41 +69,42 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
     }
 
     public void paneClosed(boolean ok) {
-        log.debug("Pane closed");
+        log.debug("Pane closed " + ok);
         if (ok && currentImage != null) {
-            PhotoWorker.getInstance().addSouvenirImage(currentImage, notifier.getName(),
-                    notifier.getCrime());
+            PhotoWorker.getInstance().addPhoto(currentImage, notifier.getCaption());
         }
         if (this.isCountingDown) {
             this.director.cancel();
             this.isCountingDown = false;
         }
+        this.triggerPane.setVisible(true);
     }
+
     public void countDownAt(int i) {
-        this.isCountingDown = true;
+        this.isCountingDown = i > 0;
+        log.debug("count down " + this.isCountingDown + " at " + i);
         this.countdown.setText(String.valueOf(i));
         this.notifier.showContent(this.countdown, PreviewPane.HALF_SCREEN_SIZE, false);
 
         if (i == 0) {
             this.notifier.flashOff();
-            this.isCountingDown = false;
         }
         this.validate();
     }
 
     public void processing() {
-        /*
         this.notifier.showContent(this.processing,
-                PreviewPane.NOTIFICATION_SIZE);
-        this.notifier.setCloseText("its längt's");
-         */
+                PreviewPane.HALF_SCREEN_SIZE, false);
     }
 
     public void ready(String filename) {
-        if (this.isNotifying() || this.isCountingDown) {
+        if (this.isCountingDown) {
+            log.debug("Ready but still counting down" );
             return;
         }
+        log.debug("Ready " + filename);
         if (filename != null) {
+            this.currentImage = new File(filename);
             ImageIcon icon = new ImageIcon(filename);
             this.imagePane.setImage(icon.getImage());
             this.notifier.showContent(this.imagePane, PreviewPane.SCREEN_SIZE, true);
@@ -127,6 +130,7 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
 
         this.initFramePanel();
         this.initCountdown();
+        this.initProcessing();
         this.notifier.addCloseListener(this);
 
         this.validate();
@@ -171,14 +175,30 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
         return message;
     }
 
-    private JButton initTriggerButton() {
+    private JComponent initTriggerButton() {
         ImageIcon icon = this.loadIcon(CAMERA_IMAGE);
         icon = new ImageIcon(icon.getImage().getScaledInstance(
                 BUTTON_SIZE, BUTTON_SIZE, Image.SCALE_SMOOTH));
-        JButton button = new RoundButton(new CountdownAction(icon));
-        button.setForeground(AppOptions.getInstance().getLafColorHighlight());
-        return button;
+        Color color = new Color(90, 255, 90);
+        JButton button = new JButton(new CountdownAction());
+        button.setFont(getLafFont());
+        button.setOpaque(true);
+        button.setBackground(color.brighter());
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setBorder(BorderFactory.createLineBorder(color.darker()));
+        button.setPreferredSize(new Dimension(400, 60));
+        button.setMaximumSize(new Dimension(400, 60));
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        triggerPane.setLayout(new BoxLayout(triggerPane, BoxLayout.Y_AXIS));
+        triggerPane.add(button);
+        triggerPane.setBackground(Color.black);
+        return triggerPane;
     }
+
+    private Font getLafFont() {
+        return new Font(AppOptions.getInstance().getLafFont(), Font.PLAIN, 36);
+    }
+
     private JPanel initSpinnerPane() {
         JPanel pane = new JPanel();
         pane.setLayout(new BorderLayout());
@@ -214,6 +234,19 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
                 (int)PreviewPane.HALF_SCREEN_SIZE.getHeight() / 2);
         this.countdown.setFont(font);
         this.countdown.setForeground(Color.WHITE);
+    }
+
+    private void initProcessing() {
+        ImageIcon icon = this.loadIcon(SPINNER_LARGE_IMAGE);
+        processing.setIcon(icon);
+        processing.setOpaque(false);
+        processing.setIconTextGap(20);
+
+        processing.setHorizontalAlignment(JLabel.CENTER);
+        processing.setHorizontalTextPosition(JLabel.CENTER);
+        processing.setVerticalTextPosition(JLabel.BOTTOM);
+        processing.setForeground(Color.WHITE);
+        processing.setText(null);
     }
 
     private ImageIcon loadIcon(String file) {
@@ -256,14 +289,16 @@ public class BoothFrame extends JFrame implements PaneCloseListener, WorkerListe
     }
 
     private class CountdownAction extends AbstractAction {
-        public CountdownAction(Icon icon) {
-            super(null, icon);
+        public CountdownAction() {
+            super("Foto aufnehmen");
         }
 
         public void actionPerformed(ActionEvent e) {
             if (BoothFrame.this.isNotifying()) {
                 return;
             }
+
+            BoothFrame.this.triggerPane.setVisible(false);
             BoothFrame.this.director.andAction();
         }
     }

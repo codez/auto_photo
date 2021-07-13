@@ -20,7 +20,7 @@ public class Director {
     
     List<Timer> timers = new ArrayList<Timer>();
     
-    RandomCountdownTimerTask countdown = null;
+    RandomCountdownTimerTask randomCountdown = null;
     
     Set<DirectorListener> listeners = new HashSet<DirectorListener>();
 
@@ -32,23 +32,25 @@ public class Director {
 
         CountdownTimerTask counter = new CountdownTimerTask();
         if ( CameraAdapter.getInstance().isRandom() ) {
-            this.countdown = new RandomCountdownTimerTask();
-            counter = this.countdown;
+            this.randomCountdown = new RandomCountdownTimerTask();
+            counter = this.randomCountdown;
         }
-        Timer countdown = new Timer(true);
-        countdown.scheduleAtFixedRate(counter, 0, 1000);
-        this.timers.add(countdown);
 
         int seq = SETTINGS.getNextSequence();
         this.timers.add(new SnapshotTimerTask(this, seq).schedule());
+
+        Timer countdown = new Timer(true);
+        countdown.scheduleAtFixedRate(counter, 0, 1000);
+        this.timers.add(countdown);
     }
     
     public void snapshotReady(String filename) {
-        if (this.countdown != null) {
-            this.countdown.stop();
+        if (this.randomCountdown != null) {
+            this.randomCountdown.stop();
 
         }
-        for (DirectorListener l : Director.this.listeners) {
+        this.cancel();
+        for (DirectorListener l : this.listeners) {
             l.ready(filename);
         }
     }
@@ -58,7 +60,7 @@ public class Director {
             timer.cancel();
         }
         timers.clear();
-        this.countdown = null;
+        this.randomCountdown = null;
         log.debug("Director cancelled");
     }
     
@@ -73,10 +75,10 @@ public class Director {
     public class CountdownTimerTask extends TimerTask {
         protected int i = Director.SETTINGS.getDirectorCountdown();
         public void run() {
-            i--;
             for (DirectorListener l : Director.this.listeners) {
                 l.countDownAt(i);
             }
+            i--;
             if (i < 0) {
                 log.debug("Countdown terminated");
                 for (DirectorListener l : Director.this.listeners) {

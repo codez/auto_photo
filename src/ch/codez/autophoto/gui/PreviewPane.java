@@ -4,14 +4,7 @@
  */
 package ch.codez.autophoto.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -61,15 +54,14 @@ public class PreviewPane extends JPanel {
 
     private boolean flashing;
 
-    protected JTextField nameField = new JTextField();
-
-    protected JTextField crimeField = new JTextField();
+    protected JTextField captionField = new JTextField();
 
     protected JPanel captionPane;
 
     private JButton use, discard;
 
     private JButton closer;
+    private JComponent closerPanel;
 
     private JComponent content;
 
@@ -83,7 +75,7 @@ public class PreviewPane extends JPanel {
         this.removeAll();
         this.content = component;
         this.add(component, BorderLayout.CENTER);
-        this.add(confirmation ? this.confirmationPanel : this.closer, BorderLayout.SOUTH);
+        this.add(confirmation ? this.confirmationPanel : this.closerPanel, BorderLayout.SOUTH);
         this.requestFocus();
         this.setVisible(true);
         if (size != null) {
@@ -92,7 +84,11 @@ public class PreviewPane extends JPanel {
         this.validate();
         this.getParent().validate();
         this.repaint();
-        this.nameField.requestFocus();
+        this.captionField.requestFocus();
+    }
+
+    public void setCloseText(String text) {
+        this.closer.setText((text));
     }
 
     public synchronized void flashOff() {
@@ -165,12 +161,8 @@ public class PreviewPane extends JPanel {
         listeners.remove(l);
     }
 
-    public String getName() {
-        return nameField.getText();
-    }
-
-    public String getCrime() {
-        return crimeField.getText();
+    public String getCaption() {
+        return captionField.getText();
     }
 
     protected void paintComponent(Graphics g) {
@@ -215,21 +207,27 @@ public class PreviewPane extends JPanel {
                 PreviewPane.this.close(false);
             }
         });
+        this.closerPanel = new JPanel();
+        this.closerPanel.setLayout(new BoxLayout(closerPanel, BoxLayout.Y_AXIS));
+        this.closerPanel.setOpaque(false);
+        this.closerPanel.add(this.closer);
     }
 
     private void initConfirmationButtons() {
         confirmationPanel = new JPanel();
-        confirmationPanel.setLayout(new GridLayout(1, 2, 50, 50));
+        confirmationPanel.setLayout(new BoxLayout(confirmationPanel, BoxLayout.LINE_AXIS));
+
+       // confirmationPanel.setLayout(new GridLayout(1, 2, 50, 50));
         confirmationPanel.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 50));
         confirmationPanel.setOpaque(false);
+        confirmationPanel.add(Box.createHorizontalGlue());
 
         use = createButton("Verwenden", new Color(90, 255, 90));
         use.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 if (PreviewPane.this.askForSlogan()) {
-                    PreviewPane.this.nameField.setText("");
-                    PreviewPane.this.crimeField.setText("");
+                    PreviewPane.this.captionField.setText("");
                     log.debug("Show Caption Pane");
                     PreviewPane.this.showContent(captionPane, null, true);
                 } else {
@@ -238,6 +236,7 @@ public class PreviewPane extends JPanel {
             }
         });
         confirmationPanel.add(use);
+        confirmationPanel.add(Box.createRigidArea(new Dimension(50, 0)));
 
         discard = createButton("Verwerfen", new Color(255, 90, 90));
         discard.addActionListener(new ActionListener() {
@@ -247,6 +246,7 @@ public class PreviewPane extends JPanel {
             }
         });
         confirmationPanel.add(discard);
+        confirmationPanel.add(Box.createHorizontalGlue());
     }
 
     private JButton createButton(String label, Color color) {
@@ -255,7 +255,10 @@ public class PreviewPane extends JPanel {
         button.setBackground(color.brighter()); // (Color.LIGHT_GRAY);
         button.setOpaque(true);
         button.setBorder(BorderFactory.createLineBorder(color.darker()));
-        button.setPreferredSize(new Dimension(60, 60));
+        button.setPreferredSize(new Dimension(300, 60));
+        button.setMaximumSize(new Dimension(300, 60));
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return button;
     }
 
@@ -272,11 +275,9 @@ public class PreviewPane extends JPanel {
 
         captionPane.add(Box.createVerticalGlue());
 
-        addLabeledField("Name, Vorname:", nameField);
+        addLabeledField("Die frohe Botschaft", captionField);
 
-        captionPane.add(Box.createRigidArea(new Dimension(BORDER_WIDTH, BORDER_WIDTH * 3)));
-
-        addLabeledField("Tatbestand:", crimeField);
+        captionPane.add(Box.createVerticalGlue());
     }
 
     private void addLabeledField(String caption, JTextField field) {
@@ -294,6 +295,7 @@ public class PreviewPane extends JPanel {
         field.setFont(getLafFont());
         field.setAlignmentX(Component.CENTER_ALIGNMENT);
         field.setBorder(BorderFactory.createEmptyBorder(0, BORDER_WIDTH, 0, BORDER_WIDTH));
+        field.setPreferredSize(new Dimension(SCREEN_SIZE.width, 400));
 
         int length = AppOptions.getInstance().getCaptionLength();
         if (length > 0) {
